@@ -1,5 +1,3 @@
-// import ApiError from "../utils/ApiError";
-
 
 const sendErrorProd = (err, res) => {
     if (err.isOperational) {
