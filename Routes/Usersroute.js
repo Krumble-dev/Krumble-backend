@@ -7,8 +7,9 @@ import authenticaToken from '../Middleware/auth.js'
 
 const router = Router();
 
-
+//modif
 router.post('/signup',Usercontrollers.handleSignup);
+
 router.post('/login',Usercontrollers.handleLogin);
 router.post('/googleauth',Usercontrollers.handleGoogleAuth);
 
