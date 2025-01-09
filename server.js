@@ -8,7 +8,7 @@ import gobalErrorHandler from "./Controllers/error.controllers.js";
 
 import KrumRoutes from "./Routes/Krums.js";
 import UserRoutes from "./Routes/Usersroute.js"
-import verificationRoutes from './Routes/verification.js'
+
 
 dotenv.config();
 const app = express();
@@ -25,11 +25,10 @@ app.get("/", (req, res) => {
 
 app.use("/api/krums", KrumRoutes);
 app.use("/api/users", UserRoutes);
-app.use("/api/verification", verificationRoutes);
 
 app.use(gobalErrorHandler)
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
 
 const server = app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}/`);

@@ -18,15 +18,21 @@ export const createKrum = CatchAsync(async (req, res, next) => {
         !req.body.geolocation ||
         !req.body.description
     ){
-        return next(new ApiError("Please provide all the required fields",400));
+        return next(new ApiError(400,"Please provide all the required fields"));
     }
+
+    const user = req.user;
+    // console.log(user);
+    req.body.createdBy = user.id;
+
     const krum = await Krum.create(req.body);
     res.status(201).json(new ApiResponse(201,krum));
 });
 
 
 export const getKrums = CatchAsync(async (req, res, next) => {
-    const krums = await Krum.find();
+    const user = req.user;
+    const krums = await Krum.find({createdBy:user.id});
     res.status(200).json(new ApiResponse(200,krums));
 });
 
@@ -34,7 +40,7 @@ export const getKrums = CatchAsync(async (req, res, next) => {
 export const getKrum = CatchAsync(async (req, res, next) => {
     const krum = await Krum.findById(req.query.id);
     if(!krum){
-        return next(new ApiError("Krum not found",404));
+        return next(new ApiError(404,"Krum not found"));
     }
     res.status(200).json(new ApiResponse(200,krum));
 });
@@ -47,7 +53,7 @@ export const updateKrum = CatchAsync(async (req, res, next) => {
         runValidators:true
     });
     if(!krum){
-        return next(new ApiError("Krum not found",404));
+        return next(new ApiError(404,"Krum not found"));
     }
     res.status(200).json(new ApiResponse(200,krum));
 });
@@ -56,9 +62,10 @@ export const updateKrum = CatchAsync(async (req, res, next) => {
 export const deleteKrum = CatchAsync(async (req, res, next) => {
     const krum = await Krum.findByIdAndDelete(req.query.id);
     if(!krum){
-        return next(new ApiError("Krum not found",404));
+        return next(new ApiError(404,"Krum not found"));
     }
-    res.status(204).json(new ApiResponse(204,"Krum deleted successfully"));
+    // console.log("Krum deleted successfully");
+    res.status(200).json(new ApiResponse(204,{msg:"Krum deleted successfully"}));
 }
 );
 

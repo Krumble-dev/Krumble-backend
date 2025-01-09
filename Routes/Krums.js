@@ -1,20 +1,22 @@
 import {Router} from 'express';
 
 import krumControllers from '../Controllers/krum.controllers.js';
+import authenticaToken from '../Middleware/auth.js'
 
 
 const router = Router();
 
+router.use(authenticaToken);
 
 router.post("/create",krumControllers.createKrum);
 
-router.get("/get",krumControllers.getKrums);
+router.get("/getkrums",krumControllers.getKrums);
 
-router.get("/get/:id",krumControllers.getKrum);
+router.get("/getkrum",krumControllers.getKrum);
 
-router.patch("/update/:id",krumControllers.updateKrum);
+router.patch("/updatekrum",krumControllers.updateKrum);
 
-router.delete("/delete/:id",krumControllers.deleteKrum);
+router.delete("/deletekrum",krumControllers.deleteKrum);
 
 export default router;
 

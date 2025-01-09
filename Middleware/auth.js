@@ -1,33 +1,25 @@
 import tokenService from '../utils/tokenUtils.js';
 
+import ApiError from '../utils/ApiError.js';
+
 const authenticateToken = (req, res, next) => {
     try {
         const authHeader = req.headers['authorization'];
-        const token = authHeader && authHeader.split(' ')[1]; 
-
+        const token = authHeader  
         if (!token) {
-            return res.status(401).json({
-                status: 'error',
-                message: 'Authentication token is required'
-            });
+            return next(new ApiError( 401,"Please login to get access"));
         }
 
         const { valid, expired, decoded } = tokenService.verifyToken(token);
 
         if (!valid) {
-            return res.status(401).json({
-                status: 'error',
-                message: expired ? 'Token has expired' : 'Invalid token'
-            });
+            return next(new ApiError(401, "Invalid token"));
         }
 
         req.user = decoded;
         next();
     } catch (error) {
-        return res.status(401).json({
-            status: 'error',
-            message: 'Invalid token'
-        });
+        return next(new ApiError(401, "Please login to get access"));
     }
 };
 

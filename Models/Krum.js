@@ -17,11 +17,11 @@ const KrumSchema = new Schema({
     geolocation:{
         type: {
             type: String,
-            enum: ['Point'], // Supports GeoJSON Point type
+            enum: ['Point'], 
             required: true,
           },
           coordinates: {
-            type: [Number], // [longitude, latitude]
+            type: [Number], 
             required: true,
           },
     },
@@ -33,11 +33,11 @@ const KrumSchema = new Schema({
         type:Boolean,
         default:true
     },
-    // createdBy:{
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: "User",
-    //     required:true
-    // }
+    createdBy:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Users",
+        required:true
+    }
 });
 
 
