@@ -3,10 +3,12 @@ import dotenv from "dotenv";
 import connectToMongo from "./db/db.js";
 
 import cors from "cors";
+
 import gobalErrorHandler from "./Controllers/error.controllers.js";
 
 import KrumRoutes from "./Routes/Krums.js";
-
+import UserRoutes from "./Routes/Usersroute.js"
+import verificationRoutes from './Routes/verification.js'
 
 dotenv.config();
 const app = express();
@@ -22,10 +24,8 @@ app.get("/", (req, res) => {
 
 
 app.use("/api/krums", KrumRoutes);
-
-
-
-
+app.use("/api/users", UserRoutes);
+app.use("/api/verification", verificationRoutes);
 
 app.use(gobalErrorHandler)
 

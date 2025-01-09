@@ -70,3 +70,10 @@ export default {
     updateKrum,
     deleteKrum
 }
+
+
+
+
+
+
+
