@@ -33,9 +33,13 @@ const HandleUserUpdate = CatchAsync(async (req, res, next) => {
   }
   
   const decoded = tokenService.verifyToken(token); 
+  
+  if (!decoded ) {
+    return next(new ApiError(401, "Invalid or expired token"));
+  }
 
-  if (!decoded) {
-      return next(new ApiError(401, "Invalid or expired token"));
+  if(!decoded.decoded){
+    return next(new ApiError(401, "No user data from token"));
   }
 
   const userId = decoded.decoded.id;
@@ -54,4 +58,4 @@ const HandleUserUpdate = CatchAsync(async (req, res, next) => {
   res.status(200).json(new ApiResponse(200, { updatedUser }));
 });
 
-export default { createUser ,HandleUserUpdate};
+export default { createUser ,HandleUserUpdate}; 
