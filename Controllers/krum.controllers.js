@@ -22,9 +22,7 @@ export const createKrum = CatchAsync(async (req, res, next) => {
     }
 
     const user = req.user;
-    // console.log(user);
     req.body.createdBy = user.id;
-
     const krum = await Krum.create(req.body);
     res.status(201).json(new ApiResponse(201,krum));
 });
