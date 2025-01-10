@@ -6,11 +6,11 @@ import CatchAsync from "../utils/CatchAsync.js";
 import tokenService from "../utils/tokenUtils.js"
 
 const createUser = CatchAsync(async (req, res, next) => {
-  const {phonenumber}=req.body;
-  if (!phonenumber) {
+  const {phonenumber,username ,location}=req.body;
+  if (!phonenumber || !username || !location) {
     return next(new ApiError(400, "Please provide all the required fields"));
   }
-  const userExists = await User.findOne({ phonenumber: req.body.phonenumber });
+  const userExists = await User.findOne({ phonenumber: req.body.phonenumber }); 
   if (userExists) {
     const token = tokenService.generateAccessToken(userExists);
     return res.status(200).json(new ApiResponse(200, { authToken: token }));
@@ -23,21 +23,35 @@ const createUser = CatchAsync(async (req, res, next) => {
 
 
 const HandleUserUpdate = CatchAsync(async (req, res, next) => {
-  const { phonenumber, token } = req.body;
-  if (!phonenumber || !token) {
-    console.log("dd")
-      return next(new ApiError(400, "Please provide all the required fields"));
+  const { username, location, token } = req.body;
+  if (!token) {
+    return next(new ApiError(400, "Token is required"));
   }
+  
+  if (!username && !location) {
+    return next(new ApiError(400, "At least one field (phonenumber, username, location) must be provided"));
+  }
+  
   const decoded = tokenService.verifyToken(token); 
+
+  if (!decoded) {
+      return next(new ApiError(401, "Invalid or expired token"));
+  }
+
   const userId = decoded.decoded.id;
+  const allowedUpdates = {};
+  if (username) allowedUpdates.username = username;
+  if (location) allowedUpdates.location = location;
   const updatedUser = await User.findByIdAndUpdate(
       userId,
-      { phonenumber },
-      { new: true} 
+      allowedUpdates,
+      { new: true, runValidators: true } 
   );
+
   if (!updatedUser) {
       return next(new ApiError(404, "User not found"));
   }
-  res.status(200).json(new ApiResponse(200, {updatedUser}));
+  res.status(200).json(new ApiResponse(200, { updatedUser }));
 });
+
 export default { createUser ,HandleUserUpdate};
