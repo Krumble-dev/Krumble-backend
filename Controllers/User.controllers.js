@@ -28,7 +28,7 @@ const createUser = CatchAsync(async (req, res, next) => {
 
 
 const HandleUserUpdate = CatchAsync(async (req, res, next) => {
-  const { username, location ,phonenumber } = req.body;
+  const { username, location  } = req.body;
   if (!username && !location) {
     return next(new ApiError(400, "At least one field (phonenumber, username, location) must be provided"));
   }
