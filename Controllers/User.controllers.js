@@ -6,12 +6,13 @@ import CatchAsync from "../utils/CatchAsync.js";
 import tokenService from "../utils/tokenUtils.js"
 
 const createUser = CatchAsync(async (req, res, next) => {
-  const {phonenumber,username ,location}=req.body;
-  if (!phonenumber && !username && !location) {
-    console.log("no")
+  const {phonenumber ,location}=req.body;
+  if (!phonenumber && !location) {
     return  res.status(401).next(new ApiError(400, "Please provide all the required fields"));
   }
-  const userExists = await User.findOne({ phonenumber: req.body.phonenumber }); 
+  const query = {};
+  if (phonenumber) query.phonenumber = phonenumber;
+  const userExists = await User.findOne(query); 
   if (userExists) {
     const token = tokenService.generateAccessToken(userExists);
     return res.status(200).json(new ApiResponse(200, { authToken: token ,UserInfo:userExists }));
@@ -35,6 +36,7 @@ const HandleUserUpdate = CatchAsync(async (req, res, next) => {
   const allowedUpdates = {};
   if (username) allowedUpdates.username = username;
   if (location) allowedUpdates.location = location;
+
   const updatedUser = await User.findByIdAndUpdate(
       phonenumber,
       allowedUpdates,
