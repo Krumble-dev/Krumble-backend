@@ -13,11 +13,14 @@ const createUser = CatchAsync(async (req, res, next) => {
   const userExists = await User.findOne({ phonenumber: req.body.phonenumber }); 
   if (userExists) {
     const token = tokenService.generateAccessToken(userExists);
-    return res.status(200).json(new ApiResponse(200, { authToken: token }));
+    return res.status(200).json(new ApiResponse(200, { authToken: token ,UserInfo:userExists }));
   } else {
-    const user = await User.create(req.body);
-    const token = tokenService.generateAccessToken(user);
-    return res.status(201).json(new ApiResponse(201, { authToken: token }));
+    const Newuser = await User.create(req.body);
+    const token = tokenService.generateAccessToken(Newuser);
+    if (!token) {
+      return res.status(401).next(new ApiError(400, "Token is required"));
+    }
+    return res.status(201).json(new ApiResponse(201, { authToken: token,UserInfo:Newuser  }));
   }
 });
 
@@ -25,21 +28,21 @@ const createUser = CatchAsync(async (req, res, next) => {
 const HandleUserUpdate = CatchAsync(async (req, res, next) => {
   const { username, location, token } = req.body;
   if (!token) {
-    return next(new ApiError(400, "Token is required"));
+    return res.status(401).next(new ApiError(400, "Token is required"));
   }
   
   if (!username && !location) {
-    return next(new ApiError(400, "At least one field (phonenumber, username, location) must be provided"));
+    return res.status(401).next(new ApiError(400, "At least one field (phonenumber, username, location) must be provided"));
   }
   
   const decoded = tokenService.verifyToken(token); 
   
   if (!decoded ) {
-    return next(new ApiError(401, "Invalid or expired token"));
+    return res.status(401).next(new ApiError(401, "Invalid or expired token"));
   }
 
   if(!decoded.decoded){
-    return next(new ApiError(401, "No user data from token"));
+    return res.status(401).next(new ApiError(401, "No user data from token"));
   }
 
   const userId = decoded.decoded.id;
@@ -53,7 +56,7 @@ const HandleUserUpdate = CatchAsync(async (req, res, next) => {
   );
 
   if (!updatedUser) {
-      return next(new ApiError(404, "User not found"));
+      return res.status(401).next(new ApiError(404, "User not found"));
   }
   res.status(200).json(new ApiResponse(200, { updatedUser }));
 });
