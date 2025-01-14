@@ -9,7 +9,7 @@ const createUser = CatchAsync(async (req, res, next) => {
   const {phonenumber,username ,location}=req.body;
   if (!phonenumber && !username && !location) {
     console.log("no")
-    return (new ApiError(400, "Please provide all the required fields"));
+    return  res.status(401).next(new ApiError(400, "Please provide all the required fields"));
   }
   const userExists = await User.findOne({ phonenumber: req.body.phonenumber }); 
   if (userExists) {
