@@ -8,7 +8,7 @@ import tokenService from "../utils/tokenUtils.js"
 const createUser = CatchAsync(async (req, res, next) => {
   const {phonenumber ,location}=req.body;
   if (!phonenumber && !location) {
-    return  res.status(401).next(new ApiError(400, "Please provide all the required fields"));
+    return  next(new ApiError(400, "Please provide all the required fields"));
   }
   const query = {};
   if (phonenumber) query.phonenumber = phonenumber;
