@@ -16,6 +16,7 @@ const authenticateToken = (req, res, next) => {
             return next(new ApiError(401, "Invalid token"));
         }
         req.user = decoded;
+    
         next();
     } catch (error) {
         return next(new ApiError(401, "Please login to get access"));

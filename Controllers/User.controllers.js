@@ -30,15 +30,16 @@ const createUser = CatchAsync(async (req, res, next) => {
 const HandleUserUpdate = CatchAsync(async (req, res, next) => {
   const { username, location ,phonenumber } = req.body;
   if (!username && !location) {
-    return res.status(401).next(new ApiError(400, "At least one field (phonenumber, username, location) must be provided"));
+    return next(new ApiError(400, "At least one field (phonenumber, username, location) must be provided"));
   }
   
   const allowedUpdates = {};
   if (username) allowedUpdates.username = username;
   if (location) allowedUpdates.location = location;
-
+  const userId = req.user.id;
+  
   const updatedUser = await User.findByIdAndUpdate(
-      phonenumber,
+      userId,
       allowedUpdates,
       { new: true, runValidators: true } 
   );
