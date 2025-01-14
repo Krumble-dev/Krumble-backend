@@ -4,10 +4,12 @@ import ApiResponse from "../utils/ApiResponse.js";
 import ApiError from "../utils/ApiError.js";
 import CatchAsync from "../utils/CatchAsync.js";
 import tokenService from "../utils/tokenUtils.js"
+import { decode } from "jsonwebtoken";
 
 const createUser = CatchAsync(async (req, res, next) => {
   const {phonenumber,username ,location}=req.body;
-  if (!phonenumber || !username || !location) {
+
+  if (!username && !location && !phonenumber) {
     return next(new ApiError(400, "Please provide all the required fields"));
   }
   const userExists = await User.findOne({ phonenumber: req.body.phonenumber }); 
@@ -26,38 +28,25 @@ const createUser = CatchAsync(async (req, res, next) => {
 
 
 const HandleUserUpdate = CatchAsync(async (req, res, next) => {
-  const { username, location, token } = req.body;
-  if (!token) {
-    return res.status(401).next(new ApiError(400, "Token is required"));
-  }
-  
+  const { username, location ,phonenumber } = req.body;
+
   if (!username && !location) {
     return res.status(401).next(new ApiError(400, "At least one field (phonenumber, username, location) must be provided"));
   }
-  
-  const decoded = tokenService.verifyToken(token); 
-  
-  if (!decoded ) {
-    return res.status(401).next(new ApiError(401, "Invalid or expired token"));
-  }
-
-  if(!decoded.decoded){
-    return res.status(401).next(new ApiError(401, "No user data from token"));
-  }
-
-  const userId = decoded.decoded.id;
   const allowedUpdates = {};
   if (username) allowedUpdates.username = username;
   if (location) allowedUpdates.location = location;
   const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      allowedUpdates,
-      { new: true, runValidators: true } 
+    phonenumber,
+    allowedUpdates,
+    { new: true, runValidators: true } 
   );
+  
 
   if (!updatedUser) {
-      return res.status(401).next(new ApiError(404, "User not found"));
-  }
+      return next(new ApiError(404, "User not found"));
+  } 
+
   res.status(200).json(new ApiResponse(200, { updatedUser }));
 });
 

@@ -7,7 +7,7 @@ const authenticateToken = (req, res, next) => {
         const authHeader = req.headers['authorization'];
         const token = authHeader  
         if (!token) {
-            return next(new ApiError( 401,"Please login to get access"));
+            res.status(201).next(new ApiError( 401,"Please login to get access"));
         }
 
         const { valid, expired, decoded } = tokenService.verifyToken(token);
@@ -15,7 +15,6 @@ const authenticateToken = (req, res, next) => {
         if (!valid) {
             return next(new ApiError(401, "Invalid token"));
         }
-
         req.user = decoded;
         next();
     } catch (error) {
