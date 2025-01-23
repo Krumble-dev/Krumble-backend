@@ -37,7 +37,11 @@ const KrumSchema = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "Users",
         required:true
-    }
+    },
+    collectedBy:[{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Users"
+    }]
 });
 
 

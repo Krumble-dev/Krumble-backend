@@ -19,7 +19,7 @@ class TokenService {
                 id: user._id
             },
             this.secret,
-            { expiresIn: this.expiresIn }
+            // { expiresIn: this.expiresIn }
         );
     }
 

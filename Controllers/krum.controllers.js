@@ -68,12 +68,63 @@ export const deleteKrum = CatchAsync(async (req, res, next) => {
 );
 
 
+export const collectKrum = CatchAsync(async (req, res, next) => {
+    const krum = await Krum.findById(req.query.id);
+    if(!krum){
+        return next(new ApiError(404,"Krum not found"));
+    }
+
+    if(krum.collectedBy.includes(req.user.id)){
+        return next(new ApiError(400,"Krum already collected"));
+    }
+
+    if(krum.createdBy === req.user.id){
+        return next(new ApiError(400,"You cannot collect your own Krum"));
+    }
+
+    if(krum.collectableKrums === krum.collectedBy.length){
+        return next(new ApiError(400,"Krum already collected by all users"));
+    }
+
+    krum.collectedBy.push(req.user.id);
+    krum.isActive = krum.collectableKrums === krum.collectedBy.length ? false : true;
+    await krum.save();
+
+    const user = req.user;
+    user.collectedKrums = user.collectedKrums || [];
+    user.collectedKrums.push(req.query.id);
+    await user.save();
+
+    res.status(200).json(new ApiResponse(200,{msg:"Krum collected successfully",krum}));
+});
+
+
+export const nearbyKrums = CatchAsync(async (req, res, next) => {
+    const {latitude,longitude} = req.query;
+    const krums = await Krum.find({
+        geolocation:{
+            $near:{
+                $geometry:{
+                    type:"Point",
+                    coordinates:[longitude,latitude]
+                },
+                $maxDistance:10000
+            }
+        }
+    });
+    res.status(200).json(new ApiResponse(200,krums));
+});
+
+
+
 export default {
     createKrum,
     getKrums,
     getKrum,
     updateKrum,
-    deleteKrum
+    deleteKrum,
+    collectKrum,
+    nearbyKrums
 }
 
 

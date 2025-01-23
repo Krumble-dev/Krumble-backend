@@ -18,6 +18,8 @@ router.patch("/updatekrum",krumControllers.updateKrum);
 
 router.delete("/deletekrum",krumControllers.deleteKrum);
 
+router.get("/nearbykrums",krumControllers.nearbyKrums);
+
 export default router;
 
 

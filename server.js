@@ -8,7 +8,7 @@ import gobalErrorHandler from "./Controllers/error.controllers.js";
 
 import KrumRoutes from "./Routes/Krums.js";
 import UserRoutes from "./Routes/Usersroute.js"
-import KrummodelRouter from "./Routes/KrummodelRouter.js";
+import KrumModelRoutes from "./Routes/KrumModel.js"
 
 dotenv.config();
 const app = express();
@@ -25,7 +25,8 @@ app.get("/", (req, res) => {
 
 app.use("/api/krums", KrumRoutes);
 app.use("/api/users", UserRoutes);
-app.use("/api/Krumsmodel", KrummodelRouter);
+app.use("/api/krummodels", KrumModelRoutes);
+
 
 app.use(gobalErrorHandler)
 

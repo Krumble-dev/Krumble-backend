@@ -6,7 +6,8 @@ const userSchema = new Schema({
   username: { type: String ,unique: true},
   location: { type: String },
   created_at: { type: Date, default: Date.now },
-  updated_at: { type: Date, default: Date.now }
+  updated_at: { type: Date, default: Date.now },
+  collectedKrums: [{ type: mongoose.Schema.Types.ObjectId, ref: "Krum" }],
 });
 
 

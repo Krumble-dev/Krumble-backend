@@ -4,8 +4,7 @@ import ApiResponse from "../utils/ApiResponse.js";
 import ApiError from "../utils/ApiError.js";
 import CatchAsync from "../utils/CatchAsync.js";
 
-import ARModel from '../Models/ARModel.js';
-import User from "../Models/User.js"
+import KrumModel from '../Models/KrumModel.js';
 import { Storage } from "@google-cloud/storage";
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -29,39 +28,13 @@ const storage = new Storage();
 const bucketName = "krumble";
 
 
-function isValidCoordinate(longitude, latitude) {
-  const minLongitude = -180;
-  const maxLongitude = 180;
-  const minLatitude = -90;
-  const maxLatitude = 90;
 
-  return (
-    longitude >= minLongitude && longitude <= maxLongitude &&
-    latitude >= minLatitude && latitude <= maxLatitude
-  );
-}
-
-
-export const dropARModel = async (req, res, next) => {
-  try {
-    console.log("Request received:", {
-      file: req.file,
-      body: req.body,
-    });
-
-    if (!req.file) {
-      return next(new ApiError(400, 'File is required.'));
+export const uploadKrumModel = CatchAsync(async (req, res, next) => {
+    if(!req.file || !req.body.name || !req.body.description ){
+        return next(new ApiError(400,"Please provide all the required fields"));
     }
 
-    const { name, description, longitude, latitude } = req.body;
-
-    if (!longitude || !latitude) {
-      return next(new ApiError(400, 'Location coordinates (longitude and latitude) are required.'));
-    }
-
-    if (!isValidCoordinate(longitude, latitude)) {
-      return next(new ApiError(400, `Invalid location coordinates. Longitude must be between -180 and 180, Latitude must be between -90 and 90.`));
-    }
+    const { name, description } = req.body;
 
     const fileName = `${Date.now()}-${req.file.originalname}`;
     const bucket = storage.bucket(bucketName);
@@ -73,59 +46,137 @@ export const dropARModel = async (req, res, next) => {
 
     stream.on('error', (err) => {
       console.error("File upload error:", err);
-      next(new ApiError(500, `File upload failed: ${err.message}`));
+      return next(new ApiError(500, `File upload failed: ${err.message}`));
     });
 
     stream.on('finish', async () => {
       const publicUrl = `https://storage.googleapis.com/${bucketName}/${fileName}`;
 
-      const newARModel = await ARModel.create({
+      const  ModelUploaded = await KrumModel.create({
         name,
         description,
-        fileUrl: publicUrl,
-        location: { type: 'Point', coordinates: [longitude, latitude] },
-        createdBy: req.user.id,
+        ModelURL: publicUrl
       });
 
-      res.status(201).json(new ApiResponse(201, { message: 'AR model dropped!', model: newARModel }));
+      return res.status(201).json(new ApiResponse(201, { message: 'Model uploaded!', model: ModelUploaded }));
     });
 
     stream.end(req.file.buffer);
-  } catch (error) {
-    console.error("Error in dropARModel:", error.message);
-    next(new ApiError(500, error.message));
+    return next(
+      new ApiError(500, 'File upload failed: Unknown error occurred.')
+    )
+});
+
+
+export const getKrumModels = CatchAsync(async (req, res, next) => {
+    const models = await KrumModel.find();
+    return res.status(200).json(new ApiResponse(200, models));
+});
+
+
+export const deleteKrumModel = CatchAsync(async (req, res, next) => {
+
+  const KrumModel = await KrumModel.findByIdAndDelete(req.query.id);
+  if(!KrumModel){
+      return next(new ApiError(404,"KrumModel not found"));
   }
-};
+  return res.status(200).json(new ApiResponse(200, { message: 'KrumModel deleted successfully!' }));
+});
 
-export const collectARModel = async (req, res, next) => {
-  try {
-    const { modelId } = req.params;
-    if (!req.body) {
-      return next(new ApiError(400, 'No request body provided.'));
-    }
 
-    const arModel = await ARModel.findById(modelId);
-    if (!arModel) return next(new ApiError(404, 'AR model not found.'));
 
-if (arModel.collectedBy.includes(req.user.id)) {
-  return next(new ApiError(400, 'You have already collected this model.'));
-}
-arModel.collectedBy.push(req.user.id);
-await arModel.save();
+// export const dropARModel = async (req, res, next) => {
+//   try {
+//     console.log("Request received:", {
+//       file: req.file,
+//       body: req.body,
+//     });
 
-const user = await User.findById(req.user.id);
-    if (!user) {
-      return next(new ApiError(404, 'User not found.'));
-    }
+//     if (!req.file) {
+//       return next(new ApiError(400, 'File is required.'));
+//     }
+
+//     const { name, description, longitude, latitude } = req.body;
+
+//     if (!longitude || !latitude) {
+//       return next(new ApiError(400, 'Location coordinates (longitude and latitude) are required.'));
+//     }
+
+//     if (!isValidCoordinate(longitude, latitude)) {
+//       return next(new ApiError(400, `Invalid location coordinates. Longitude must be between -180 and 180, Latitude must be between -90 and 90.`));
+//     }
+
+//     const fileName = `${Date.now()}-${req.file.originalname}`;
+//     const bucket = storage.bucket(bucketName);
+//     const file = bucket.file(fileName);
+
+//     const stream = file.createWriteStream({
+//       metadata: { contentType: req.file.mimetype },
+//     });
+
+//     stream.on('error', (err) => {
+//       console.error("File upload error:", err);
+//       next(new ApiError(500, `File upload failed: ${err.message}`));
+//     });
+
+//     stream.on('finish', async () => {
+//       const publicUrl = `https://storage.googleapis.com/${bucketName}/${fileName}`;
+
+//       const newARModel = await ARModel.create({
+//         name,
+//         description,
+//         fileUrl: publicUrl,
+//         location: { type: 'Point', coordinates: [longitude, latitude] },
+//         createdBy: req.user.id,
+//       });
+
+//       res.status(201).json(new ApiResponse(201, { message: 'AR model dropped!', model: newARModel }));
+//     });
+
+//     stream.end(req.file.buffer);
+//   } catch (error) {
+//     console.error("Error in dropARModel:", error.message);
+//     next(new ApiError(500, error.message));
+//   }
+// };
+
+// export const collectARModel = async (req, res, next) => {
+//   try {
+//     const { modelId } = req.params;
+//     if (!req.body) {
+//       return next(new ApiError(400, 'No request body provided.'));
+//     }
+
+//     const arModel = await ARModel.findById(modelId);
+//     if (!arModel) return next(new ApiError(404, 'AR model not found.'));
+
+// if (arModel.collectedBy.includes(req.user.id)) {
+//   return next(new ApiError(400, 'You have already collected this model.'));
+// }
+// arModel.collectedBy.push(req.user.id);
+// await arModel.save();
+
+// const user = await User.findById(req.user.id);
+//     if (!user) {
+//       return next(new ApiError(404, 'User not found.'));
+//     }
 
     
-    user.collectedModels = user.collectedModels || []; 
-    user.collectedModels.push(modelId);
-    await user.save();
+//     user.collectedModels = user.collectedModels || []; 
+//     user.collectedModels.push(modelId);
+//     await user.save();
 
-    res.status(200).json(new ApiResponse(200, { message: 'Model collected!', model: arModel }));
-  } catch (error) {
-    console.error("Error in collectARModel:", error.message);
-    next(new ApiError(500, error.message));
-  }
+//     res.status(200).json(new ApiResponse(200, { message: 'Model collected!', model: arModel }));
+//   } catch (error) {
+//     console.error("Error in collectARModel:", error.message);
+//     next(new ApiError(500, error.message));
+//   }
+// };
+
+
+
+export default {
+    uploadKrumModel,
+    getKrumModels,
+    deleteKrumModel
 };
