@@ -10,10 +10,10 @@ class TokenService {
             throw new Error('JWT_SECRET must be defined in environment variables');
         }
         this.secret = process.env.JWT_SECRET;
-        this.expiresIn = process.env.JWT_EXPIRES_IN || '1h';
+        this.expiresIn = process.env.JWT_EXPIRES_IN || '100y';
     }
 
-    generateAccessToken(user) {
+    generateAccessToken(user) { 
         return jwt.sign(
             {
                 id: user._id
