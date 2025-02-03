@@ -24,52 +24,52 @@ dotenv.config();
 // }
 
 // process.env.GOOGLE_APPLICATION_CREDENTIALS = keyPath;
-// const storage = new Storage({
-//   projectId:"omega-healer-448021-v9",
-//   keyFilename:"Key.json"
-// }
-// );
-// const bucketName = "krumble";
+const storage = new Storage({
+  projectId:"omega-healer-448021-v9",
+  keyFilename:"Key.json"
+}
+);
+const bucketName = "krumble";
 
 
 
-// export const uploadKrumModel = CatchAsync(async (req, res, next) => {
-//     if(!req.file || !req.body.name || !req.body.description ){
-//         return next(new ApiError(400,"Please provide all the required fields"));
-//     }
+export const uploadKrumModel = CatchAsync(async (req, res, next) => {
+    if(!req.file || !req.body.name || !req.body.description ){
+        return next(new ApiError(400,"Please provide all the required fields"));
+    }
 
-//     const { name, description } = req.body;
+    const { name, description } = req.body;
 
-//     const fileName = `${Date.now()}-${req.file.originalname}`;
-//     const bucket = storage.bucket(bucketName);
-//     const file = bucket.file(fileName);
+    const fileName = `${Date.now()}-${req.file.originalname}`;
+    const bucket = storage.bucket(bucketName);
+    const file = bucket.file(fileName);
 
-//     const stream = file.createWriteStream({
-//       metadata: { contentType: req.file.mimetype },
-//     });
+    const stream = file.createWriteStream({
+      metadata: { contentType: req.file.mimetype },
+    });
 
-//     stream.on('error', (err) => {
-//       console.error("File upload error:", err);
-//       return next(new ApiError(500, `File upload failed: ${err.message}`));
-//     });
+    stream.on('error', (err) => {
+      console.error("File upload error:", err);
+      return next(new ApiError(500, `File upload failed: ${err.message}`));
+    });
 
-//     stream.on('finish', async () => {
-//       const publicUrl = `https://storage.googleapis.com/${bucketName}/${fileName}`;
+    stream.on('finish', async () => {
+      const publicUrl = `https://storage.googleapis.com/${bucketName}/${fileName}`;
 
-//       const  ModelUploaded = await KrumModel.create({
-//         name,
-//         description,
-//         ModelURL: publicUrl
-//       });
+      const  ModelUploaded = await KrumModel.create({
+        name,
+        description,
+        ModelURL: publicUrl
+      });
 
-//       return res.status(201).json(new ApiResponse(201, { message: 'Model uploaded!', model: ModelUploaded }));
-//     });
+      return res.status(201).json(new ApiResponse(201, { message: 'Model uploaded!', model: ModelUploaded }));
+    });
 
-//     stream.end(req.file.buffer);
-//     return next(
-//       new ApiError(500, 'File upload failed: Unknown error occurred.')
-//     )
-// });
+    stream.end(req.file.buffer);
+    return next(
+      new ApiError(500, 'File upload failed: Unknown error occurred.')
+    )
+});
 
 
 export const getKrumModels = CatchAsync(async (req, res, next) => {
@@ -180,7 +180,7 @@ export const deleteKrumModel = CatchAsync(async (req, res, next) => {
 
 
 export default {
-    // uploadKrumModel,
+    uploadKrumModel,
     getKrumModels,
     deleteKrumModel
 };
