@@ -26,7 +26,7 @@ dotenv.config();
 // process.env.GOOGLE_APPLICATION_CREDENTIALS = keyPath;
 const storage = new Storage({
   projectId:"omega-healer-448021-v9",
-  keyFilename:"../etc/secrets/Key.json"
+  keyFilename:"Key.json"
 }
 );
 const bucketName = "krumble";
