@@ -2,7 +2,7 @@ import express from 'express';
 import authenticaToken from '../Middleware/auth.js';
 import multer from 'multer';
 
-import krumModelControllers from '../Controllers/krumModel.controllers.js';
+import krumModelControllers from '../Controllers/krummodel.controllers.js';
 
 
 const router = express.Router();
