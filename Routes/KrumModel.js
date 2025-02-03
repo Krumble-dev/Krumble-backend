@@ -11,7 +11,7 @@ router.use(authenticaToken);
 
 
 
-router.post('/create',upload.single('file'), krumModelControllers.uploadKrumModel);
+// router.post('/create',upload.single('file'), krumModelControllers.uploadKrumModel);
 router.get('/getkrummodels', krumModelControllers.getKrumModels);
 router.delete('/deletekrummodel', krumModelControllers.deleteKrumModel);
 
