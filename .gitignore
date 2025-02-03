@@ -1,5 +1,5 @@
 .env
 
-/Controllers/Key.json
-
 /node_modules
+
+Key.json

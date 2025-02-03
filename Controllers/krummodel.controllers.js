@@ -34,42 +34,44 @@ const bucketName = "krumble";
 
 
 export const uploadKrumModel = CatchAsync(async (req, res, next) => {
-    if(!req.file || !req.body.name || !req.body.description ){
-        return next(new ApiError(400,"Please provide all the required fields"));
-    }
+  
+  if (!req.file || !req.body.name || !req.body.description) {
+    return next(new ApiError(400, "Please provide all the required fields"));
+  }
 
-    const { name, description } = req.body;
+  const { name, description } = req.body;
+  const fileName = `${Date.now()}-${req.file.originalname}`;
+  const bucket = storage.bucket(bucketName);
+  const file = bucket.file(fileName);
 
-    const fileName = `${Date.now()}-${req.file.originalname}`;
-    const bucket = storage.bucket(bucketName);
-    const file = bucket.file(fileName);
+  const stream = file.createWriteStream({
+    metadata: { contentType: req.file.mimetype },
+  });
 
-    const stream = file.createWriteStream({
-      metadata: { contentType: req.file.mimetype },
-    });
+  stream.on('error', (err) => {
+    console.error("File upload error:", err);
+    return next(new ApiError(500, `File upload failed: ${err.message}`));
+  });
 
-    stream.on('error', (err) => {
-      console.error("File upload error:", err);
-      return next(new ApiError(500, `File upload failed: ${err.message}`));
-    });
-
-    stream.on('finish', async () => {
+  stream.on('finish', async () => {
+    try {
       const publicUrl = `https://storage.googleapis.com/${bucketName}/${fileName}`;
 
-      const  ModelUploaded = await KrumModel.create({
+      const ModelUploaded = await KrumModel.create({
         name,
         description,
         ModelURL: publicUrl
       });
 
       return res.status(201).json(new ApiResponse(201, { message: 'Model uploaded!', model: ModelUploaded }));
-    });
+    } catch (error) {
+      return next(new ApiError(500, "Database save failed"));
+    }
+  });
 
-    stream.end(req.file.buffer);
-    return next(
-      new ApiError(500, 'File upload failed: Unknown error occurred.')
-    )
+  stream.end(req.file.buffer);
 });
+
 
 
 export const getKrumModels = CatchAsync(async (req, res, next) => {
