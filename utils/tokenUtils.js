@@ -26,15 +26,16 @@ class TokenService {
     verifyToken(token) {
         try {
             const decoded = jwt.verify(token, this.secret);
+            // console.log(decoded);
             return {
                 valid: true,
-                expired: false,
+                // expired: false,
                 decoded
             };
         } catch (error) {
             return {
                 valid: false,
-                expired: error.name === 'TokenExpiredError',
+                // expired: error.name === 'TokenExpiredError',
                 decoded: null
             };
         }

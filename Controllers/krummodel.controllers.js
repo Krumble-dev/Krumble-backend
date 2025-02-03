@@ -13,18 +13,22 @@ import fs from 'fs';
 
 dotenv.config();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = path.dirname(__filename);
 
-const keyPath = path.join(__dirname, "key.json");
+// const keyPath = path.join(__dirname, "key.json");
 
-if (!fs.existsSync(keyPath)) {
-  console.error(`Key.json not found at path: ${keyPath}`);
-  throw new Error(`Key.json is missing. Please ensure it is available at: ${keyPath}`);
+// if (!fs.existsSync(keyPath)) {
+//   console.error(`Key.json not found at path: ${keyPath}`);
+//   throw new Error(`Key.json is missing. Please ensure it is available at: ${keyPath}`);
+// }
+
+// process.env.GOOGLE_APPLICATION_CREDENTIALS = keyPath;
+const storage = new Storage({
+  projectId:"omega-healer-448021-v9",
+  keyFilename:"../etc/secrets/Key.json"
 }
-
-process.env.GOOGLE_APPLICATION_CREDENTIALS = keyPath;
-const storage = new Storage();
+);
 const bucketName = "krumble";
 
 
