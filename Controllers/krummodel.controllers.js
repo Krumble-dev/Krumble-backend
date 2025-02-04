@@ -40,7 +40,7 @@ export const uploadKrumModel = CatchAsync(async (req, res, next) => {
   }
 
   const { name, description } = req.body;
-  const fileName = `${Date.now()}-${req.file.originalname}`;
+  const fileName = `${Date.now()}-${req.file.originalname.replace(/ /g, "_")}`;
   const bucket = storage.bucket(bucketName);
   const file = bucket.file(fileName);
 

@@ -116,6 +116,13 @@ export const nearbyKrums = CatchAsync(async (req, res, next) => {
 });
 
 
+const getallkrums = CatchAsync(async (req, res, next) => {
+    const krums = await Krum.find();
+    return res.status(200).json(new ApiResponse(200, krums));
+});
+  
+
+
 
 export default {
     createKrum,
@@ -124,7 +131,8 @@ export default {
     updateKrum,
     deleteKrum,
     collectKrum,
-    nearbyKrums
+    nearbyKrums,
+    getallkrums
 }
 
 

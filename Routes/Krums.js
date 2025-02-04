@@ -20,6 +20,8 @@ router.delete("/deletekrum",krumControllers.deleteKrum);
 
 router.get("/nearbykrums",krumControllers.nearbyKrums);
 
+router.get("/getallkrums",krumControllers.getallkrums); 
+
 export default router;
 
 
