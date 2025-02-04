@@ -33,9 +33,11 @@ const HandleUserUpdate = CatchAsync(async (req, res, next) => {
     return next(new ApiError(400, "At least one field (phonenumber, username, location) must be provided"));
   }
   
-  const Username = await User.findOne(username); 
-  if(Username){
-    return next(new ApiError(400, "UserName already exits"));
+  if(username){
+    const userExists = await User.findOne({ username });
+    if (userExists) {
+      return res.status(401).next(new ApiError(400, "Username already exists"));
+    }
   }
 
   const allowedUpdates = {};

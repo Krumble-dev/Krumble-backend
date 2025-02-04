@@ -2,12 +2,12 @@ import express from 'express';
 import authenticaToken from '../Middleware/auth.js';
 import multer from 'multer';
 
-import krumModelControllers from '../Controllers/krummodel.controllers.js';
+import krumModelControllers from '../Controllers/krummodel.controllers.js'
 
 
 const router = express.Router();
 const upload = multer(); 
-router.use(authenticaToken); 
+// router.use(authenticaToken); 
 
 
 
