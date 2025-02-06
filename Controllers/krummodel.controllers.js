@@ -35,17 +35,21 @@ const bucketName = "krumble";
 
 export const uploadKrumModel = CatchAsync(async (req, res, next) => {
   
-  if (!req.file || !req.body.name || !req.body.description) {
+  if (!req.files || !req.files.imagefile || !req.files.modelfile|| !req.body.name || !req.body.description) {
     return next(new ApiError(400, "Please provide all the required fields"));
   }
 
   const { name, description } = req.body;
-  const fileName = `${Date.now()}-${req.file.originalname.replace(/ /g, "_")}`;
+  // console.log(req.files);
+  const imagefile = req.files.imagefile[0];
+  const modelfile = req.files.modelfile[0];
+  const imgfileName = `${Date.now()}-${imagefile.originalname.replace(/ /g, "_")}`;
+  const modelfileName = `${Date.now()}-${modelfile.originalname.replace(/ /g, "_")}`;
   const bucket = storage.bucket(bucketName);
-  const file = bucket.file(fileName);
+  const imgfile = bucket.file(imgfileName);
 
-  const stream = file.createWriteStream({
-    metadata: { contentType: req.file.mimetype },
+  const stream = imgfile.createWriteStream({
+    metadata: { contentType: req.files.imagefile.mimetype },
   });
 
   stream.on('error', (err) => {
@@ -55,21 +59,38 @@ export const uploadKrumModel = CatchAsync(async (req, res, next) => {
 
   stream.on('finish', async () => {
     try {
-      const publicUrl = `https://storage.googleapis.com/${bucketName}/${fileName}`;
+      const publicImgUrl = `https://storage.googleapis.com/${bucketName}/${imgfileName}`;
 
-      const ModelUploaded = await KrumModel.create({
-        name,
-        description,
-        ModelURL: publicUrl
+      const modelFileObj = bucket.file(modelfileName);
+      const modelStream = modelFileObj.createWriteStream({ metadata: { contentType: req.files.modelfile.mimetype } });
+
+      modelStream.on("error", (err) => next(new ApiError(500, `Model file upload failed: ${err.message}`)));
+
+      modelStream.on("finish", async () => {
+        try {
+          const publicModelUrl = `https://storage.googleapis.com/${bucketName}/${modelfileName}`;
+
+          // Save to database
+          const ModelUploaded = await KrumModel.create({
+            name,
+            description,
+            ImageURL: publicImgUrl,
+            ModelURL: publicModelUrl,
+          });
+
+          return res.status(201).json(new ApiResponse(201, { message: "Model uploaded!", model: ModelUploaded }));
+        } catch (error) {
+          return next(new ApiError(500, "Database save failed"));
+        }
       });
 
-      return res.status(201).json(new ApiResponse(201, { message: 'Model uploaded!', model: ModelUploaded }));
+      modelStream.end(req.files.modelfile.buffer);
     } catch (error) {
       return next(new ApiError(500, "Database save failed"));
     }
   });
 
-  stream.end(req.file.buffer);
+  stream.end(req.files.imagefile.buffer);
 });
 
 

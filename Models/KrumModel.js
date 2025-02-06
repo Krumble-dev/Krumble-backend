@@ -13,6 +13,10 @@ const KrumModel= new mongoose.Schema({
         type: String,
         required: true
     },
+    ImageURL: {
+        type: String,
+        required: true
+    },
   });
 
 export default mongoose.model('KrumModel', KrumModel);
