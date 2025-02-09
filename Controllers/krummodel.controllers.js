@@ -103,8 +103,10 @@ export const getKrumModels = CatchAsync(async (req, res, next) => {
 
 export const deleteKrumModel = CatchAsync(async (req, res, next) => {
 
-  const KrumModel = await KrumModel.findByIdAndDelete(req.query.id);
-  if(!KrumModel){
+  // console.log(req.query.id);
+
+  const OneKrumModel = await KrumModel.findByIdAndDelete(req.query.id);
+  if(!OneKrumModel){
       return next(new ApiError(404,"KrumModel not found"));
   }
   return res.status(200).json(new ApiResponse(200, { message: 'KrumModel deleted successfully!' }));

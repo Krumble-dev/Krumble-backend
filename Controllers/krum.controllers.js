@@ -120,6 +120,13 @@ const getallkrums = CatchAsync(async (req, res, next) => {
     const krums = await Krum.find();
     return res.status(200).json(new ApiResponse(200, krums));
 });
+
+const collectedKrums = CatchAsync(async (req, res, next) => {
+
+    const user = req.user;
+    const krums = await Krum.find({ collectedBy: { $in: [user.id] } });
+    return res.status(200).json(new ApiResponse(200, krums));
+});
   
 
 
@@ -132,7 +139,8 @@ export default {
     deleteKrum,
     collectKrum,
     nearbyKrums,
-    getallkrums
+    getallkrums,
+    collectedKrums
 }
 
 

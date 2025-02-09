@@ -22,6 +22,8 @@ router.get("/nearbykrums",krumControllers.nearbyKrums);
 
 router.get("/getallkrums",krumControllers.getallkrums); 
 
+router.get("/collectedkrums",krumControllers.collectedKrums);
+
 export default router;
 
 
